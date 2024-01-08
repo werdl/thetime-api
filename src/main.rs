@@ -29,7 +29,6 @@ async fn get_local_timezone_offset(client_ip: Option<String>) -> Option<String> 
 
 #[tokio::main]
 async fn main() {
-    let utc = warp::path!("utc").map(|| reply::json(&Ntp::now()));
 
     let tz = warp::path!("tz" / String).map(|tz: String| reply::json(&Ntp::now().change_tz(tz).pretty()));
 
@@ -54,6 +53,6 @@ async fn main() {
     })
     .map(|reply: Json| reply.into_response());
 
-warp::serve(utc.or(tz).or(unix_tz).or(unix).or(local).or(ip).with(cors)).run(([0, 0, 0, 0], 3030)).await;
+warp::serve(tz.or(unix_tz).or(unix).or(local).or(ip).with(cors)).run(([0, 0, 0, 0], 3030)).await;
 
 }
