@@ -37,7 +37,10 @@ async fn main() {
 
     let unix = warp::path!("unix").map(|| reply::json(&Ntp::now().unix()));
 
-
+    let ip = warp::path!("ip").and(warp::addr::remote()).map(|remote_addr: Option<SocketAddr>| {
+        let res = get_client_ip(remote_addr);
+        reply::json(&res)
+    });
 
 
     let cors = warp::cors().allow_any_origin();
@@ -51,6 +54,6 @@ async fn main() {
     })
     .map(|reply: Json| reply.into_response());
 
-warp::serve(utc.or(tz).or(unix_tz).or(unix).or(local).with(cors)).run(([0, 0, 0, 0], 3030)).await;
+warp::serve(utc.or(tz).or(unix_tz).or(unix).or(local).or(ip).with(cors)).run(([0, 0, 0, 0], 3030)).await;
 
 }
